@@ -10,9 +10,21 @@ function DownloadFile ( [string]$URL, [string]$LocalPath, [switch]$Overwrite, [s
     if (-not $AllowEmptyFile) {
         $FileInfo = Get-Item -LiteralPath $TempFilePath
         if ($FileInfo.Length -eq 0) {
-            throw "Downloaded file is empty: $TempFilePath"
+            throw "Downloaded file is empty: $TempFilePath; URL: $URL"
         }
     }
     # move the temporary file to the desired location
     Move-Item -LiteralPath $TempFilePath -Destination $LocalPath -Force
+}
+
+function DownloadFileAsTemp ( [string]$URL, [switch]$AllowEmptyFile) {
+    $TempFilePath = [System.IO.Path]::GetTempFileName()
+    (New-Object System.Net.WebClient).DownloadFile($URL, $TempFilePath)
+    if (-not $AllowEmptyFile) {
+        $FileInfo = Get-Item -LiteralPath $TempFilePath
+        if ($FileInfo.Length -eq 0) {
+            throw "Downloaded file is empty: $TempFilePath; URL: $URL"
+        }
+    }
+    return $TempFilePath
 }
